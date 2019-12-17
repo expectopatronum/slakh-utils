@@ -28,7 +28,10 @@ def _wav_to_flac(input_path, output_dir, verbose=False):
     """
     basename = os.path.splitext(os.path.basename(input_path))[0]
     output_path = os.path.join(output_dir, basename + '.flac')
-    ffmpeg.input(input_path).output(output_path).run_async(overwrite_output=not verbose)
+    if not os.path.exists(output_path):
+        ffmpeg.input(input_path).output(output_path).run_async(overwrite_output=not verbose)
+    else:
+        print("Skipping {}".format(output_path))
 
 
 def _flac_to_wav(input_path, output_dir, verbose=False):
@@ -42,7 +45,11 @@ def _flac_to_wav(input_path, output_dir, verbose=False):
     """
     basename = os.path.splitext(os.path.basename(input_path))[0]
     output_path = os.path.join(output_dir, basename + '.wav')
-    ffmpeg.input(input_path).output(output_path).run_async(overwrite_output=not verbose)
+    
+    if not os.path.exists(output_path):
+        ffmpeg.input(input_path).output(output_path).run_async(overwrite_output=not verbose)
+    else:
+        print("Skipping {}".format(output_path))
 
 
 def _make_track_subset(input_dir, start=None, end=None):
@@ -79,8 +86,10 @@ def _convert_folder(in_track_dir, mix_name, output_base_dir, ffmpeg_func, verbos
                 os.path.join(out_track_dir, 'metadata.yaml'))
     shutil.copy(os.path.join(in_track_dir, 'all_src.mid'),
                 os.path.join(out_track_dir, 'all_src.mid'))
-    shutil.copytree(os.path.join(in_track_dir, 'MIDI'),
-                    os.path.join(out_track_dir, 'MIDI'))
+                
+    if not os.path.exists(os.path.join(out_track_dir, 'MIDI')):
+        shutil.copytree(os.path.join(in_track_dir, 'MIDI'),
+                        os.path.join(out_track_dir, 'MIDI'))
 
     ffmpeg_func(in_mix_path, out_track_dir)
 
